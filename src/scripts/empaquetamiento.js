@@ -131,8 +131,8 @@ function impossibleAns(space, table) {
 
 function getCost(ans) {
   let cost = 0;
-  let occupiedSpaces;
-  let materialsCount = ans.materials.size();
+  let occupiedSpaces = new Array();
+  let materialsCount = ans.materials.length;
   for (let i = 0; i < materialsCount; i++) {
     let lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
     let upperRight = Point(ans.table.width, -ans.materials[i].height + 1);
@@ -146,16 +146,16 @@ function getCost(ans) {
       moveSpace(space, occupiedSpaces, ans.table);
     }
   }
-  if (occupiedSpaces.size()) {
+  if (occupiedSpaces.length) {
     cost += ans.table.height * ans.table.width - getSumSpaces(occupiedSpaces);
   }
   return cost;
 }
 
 function getTables(ans) {
-  let tables;
-  let occupiedSpaces;
-  let materialsCount = ans.materials.size();
+  let tables = new Array();
+  let occupiedSpaces = new Array();
+  let materialsCount = ans.materials.length;
   for (let i = 0; i < materialsCount; i++) {
     let lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
     let upperRight = Point(ans.table.width, -ans.materials[i].height + 1);
@@ -166,7 +166,7 @@ function getTables(ans) {
       moveSpace(space, occupiedSpaces, ans.table);
     }
   }
-  if (occupiedSpaces.size()) {
+  if (occupiedSpaces.length) {
     tables.push_back(occupiedSpaces);
   }
   return tables;

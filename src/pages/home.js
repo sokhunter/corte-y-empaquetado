@@ -2,13 +2,13 @@ import React, { Component } from "react";
 import Layout from "../components/layout";
 import Canvas from "../components/canvas";
 import Spinner from "../components/spinner";
-import { prueba, ejectScript } from "../scripts/empaquetamiento";
+import { prueba, ejectScript, Material } from "../scripts/empaquetamiento";
 
 class Home extends Component {
   state = {
     loading: false,
     piezas: 1,
-    rectangulos: []
+    materials: []
   };
   handleChange = e => {
     this.setState({
@@ -24,17 +24,18 @@ class Home extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    let resultado = prueba();
-    console.log(resultado);
-
-    for (let i = 0; i < resultado.length; i++) {
-      const element = resultado[i];
+    // let resultado = prueba();
+    let materials = new Array();
+    for (let i = 1; i < this.state.piezas; i++) {
+      materials.push(
+        new Material(this.state[i], this.state[i + this.state.piezas + 1])
+      );
     }
-
     this.setState({
       loading: false,
-      resultado: resultado
+      materials: materials
     });
+    console.log(this.state);
   };
 
   render() {
@@ -187,9 +188,9 @@ class Home extends Component {
 
             <div>
               <Canvas
-                rectangulos={this.state.resultado}
                 height={this.state.alto}
-                width={this.props.ancho}
+                width={this.state.ancho}
+                materials={this.state.materials}
               ></Canvas>
             </div>
           </div>
