@@ -3,6 +3,7 @@ import Layout from "../components/layout";
 import Canvas from "../components/canvas";
 import Spinner from "../components/spinner";
 import { prueba, ejectScript } from "../scripts/empaquetamiento";
+
 class Home extends Component {
   state = {
     loading: false,
@@ -15,21 +16,25 @@ class Home extends Component {
     });
   };
   handleClick = e => {
+    console.log(this.state);
     this.setState({
       loading: true
     });
   };
 
   handleSubmit = e => {
-    // console.log(this.state);
+    e.preventDefault();
     let resultado = prueba();
-    // console.log(resultado);
+    console.log(resultado);
+
+    for (let i = 0; i < resultado.length; i++) {
+      const element = resultado[i];
+    }
 
     this.setState({
       loading: false,
       resultado: resultado
     });
-    e.preventDefault();
   };
 
   render() {
@@ -38,16 +43,36 @@ class Home extends Component {
       children.push(
         <tr key={i}>
           <th scope="row">
-            <input className="form-control" type="text" name="id[]" />
+            <input
+              className="form-control"
+              type="text"
+              name={`id_${i}`}
+              onChange={this.handleChange}
+            />
           </th>
           <td>
-            <input className="form-control" type="text" name="alto[]" />
+            <input
+              className="form-control"
+              type="text"
+              name={`alto_${i}`}
+              onChange={this.handleChange}
+            />
           </td>
           <td>
-            <input className="form-control" type="text" name="ancho[]" />
+            <input
+              className="form-control"
+              type="text"
+              name={`ancho_${i}`}
+              onChange={this.handleChange}
+            />
           </td>
           <td>
-            <input className="form-control" type="text" name="cantidad[]" />
+            <input
+              className="form-control"
+              type="text"
+              name={`cantidad_${i}`}
+              onChange={this.handleChange}
+            />
           </td>
         </tr>
       );
@@ -161,7 +186,11 @@ class Home extends Component {
             </p>
 
             <div>
-              <Canvas rectangulos={this.state.resultado}></Canvas>
+              <Canvas
+                rectangulos={this.state.resultado}
+                height={this.state.alto}
+                width={this.props.ancho}
+              ></Canvas>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ function Layout(props) {
             src=""
             width="30"
             height="30"
-            class="d-inline-block align-top"
+            className="d-inline-block align-top"
             alt=""
           />
           Proyecto

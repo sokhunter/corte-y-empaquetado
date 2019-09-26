@@ -1,4 +1,6 @@
-class Material {
+let INF = 100000 * 100000;
+
+export class Material {
   constructor(id, height, width) {
     this.id = id;
     this.height = height;
@@ -9,8 +11,8 @@ class Material {
   }
 }
 
-class Point {
-  Point(x, y) {
+export class Point {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
   }
@@ -23,11 +25,18 @@ class Point {
 }
 
 class Rectangle {
-  lowerLeft = new Point();
-  upperRight = new Point();
+  constructor(lowerLeft, upperRight) {
+    this.lowerLeft = lowerLeft;
+    this.upperRight = upperRight;
+  }
+  getSpace() {
+    let w = this.upperRight.x - this.lowerLeft.x + 1;
+    let h = this.lowerLeft.y - this.upperRight.y + 1;
+    return w * h;
+  }
 }
 
-class Input {
+export class Input {
   table = new Material();
   materials = new Array();
 }
@@ -106,18 +115,18 @@ function moveSpace(space, occupiedSpaces, table) {
   return isMoveAny;
 }
 
-function getSpace(rectangle) {
-  let w = rectangle.upperRight.x - rectangle.lowerLeft.x + 1;
-  let h = rectangle.lowerLeft.y - rectangle.upperRight.y + 1;
-  return w * h;
-}
-
 function getSumSpaces(occupiedSpaces) {
   let sumSpaces = 0;
   occupiedSpaces.map(rectangle => {
-    sumSpaces += getSpace(rectangle);
+    sumSpaces += rectangle.getSpace();
   });
   return sumSpaces;
+}
+
+function impossibleAns(space, table) {
+  exceededX = space.upperRight.x - space.lowerLeft.x + 1 > table.width;
+  exceededY = space.lowerLeft.y - space.upperRight.y + 1 > table.height;
+  return exceededX || exceededY;
 }
 
 function getCost(ans) {
@@ -128,6 +137,9 @@ function getCost(ans) {
     let lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
     let upperRight = Point(ans.table.width, -ans.materials[i].height + 1);
     let space = Rectangle(lowerLeft, upperRight);
+    if (impossibleAns(space, ans.table)) {
+      return INF;
+    }
     if (!moveSpace(space, occupiedSpaces, ans.table)) {
       cost += ans.table.height * ans.table.width - getSumSpaces(occupiedSpaces);
       occupiedSpaces.clear();
@@ -259,20 +271,38 @@ export const readInput = () => {
   return input;
 };
 
-export const ejectScript = () => {
-  let input = readInput();
+export const ejectScript = input => {
+  //   let input = readInput();
   let output = solve(input);
   console.log(getCost(output));
+
+  let tables = getTables(output);
+  for (let i = 0; i < tables.length; i++) {
+    let table = tables[i];
+    console.log("Table " + (i + 1));
+    table.map(material => {
+      console.log(
+        material.lowerLeft.x +
+          " - " +
+          material.upperRight.x +
+          "<>" +
+          material.upperRight.y +
+          "-" +
+          material.lowerLeft.y
+      );
+    });
+  }
+  return 0;
 };
 
 export const prueba = () => {
   let resultado = new Array();
-  resultado.push(new Rectangle(0, 0, 5, 4));
-  resultado.push(new Rectangle(5, 4, 10, 4));
-  resultado.push(new Rectangle(10, 5, 14, 5));
-  resultado.push(new Rectangle(3, 4, 10, 7));
-  resultado.push(new Rectangle(10, 5, 14, 6));
-  resultado.push(new Rectangle(0, 7, 7, 10));
-  resultado.push(new Rectangle(7, 7, 14, 10));
+  resultado.push(new Rectangle(new Point(0, 0), new Point(5, 4)));
+  resultado.push(new Rectangle(new Point(5, 4), new Point(10, 4)));
+  resultado.push(new Rectangle(new Point(10, 5), new Point(14, 5)));
+  resultado.push(new Rectangle(new Point(3, 4), new Point(10, 7)));
+  resultado.push(new Rectangle(new Point(10, 5), new Point(14, 6)));
+  resultado.push(new Rectangle(new Point(0, 7), new Point(7, 10)));
+  resultado.push(new Rectangle(new Point(7, 7), new Point(14, 10)));
   return resultado;
 };
