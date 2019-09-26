@@ -124,8 +124,8 @@ function getSumSpaces(occupiedSpaces) {
 }
 
 function impossibleAns(space, table) {
-  exceededX = space.upperRight.x - space.lowerLeft.x + 1 > table.width;
-  exceededY = space.lowerLeft.y - space.upperRight.y + 1 > table.height;
+  let exceededX = space.upperRight.x - space.lowerLeft.x + 1 > table.width;
+  let exceededY = space.lowerLeft.y - space.upperRight.y + 1 > table.height;
   return exceededX || exceededY;
 }
 
