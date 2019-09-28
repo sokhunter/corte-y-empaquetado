@@ -1,4 +1,4 @@
-let INF = 100000 * 100000;
+let INF = 10000 * 10000;
 
 export class Material {
   constructor(id, height, width) {
@@ -19,8 +19,14 @@ export class Point {
   moveDown() {
     this.y++;
   }
+  moveUp() {
+    this.y--;
+  }
   moveLeft() {
     this.x--;
+  }
+  moveRight() {
+    this.x++;
   }
 }
 
@@ -38,11 +44,11 @@ class Rectangle {
 
 export class Input {
   table = new Material();
-  materials = new Array();
+  materials = [];
 }
 
 function getList(len) {
-  let list = new Array();
+  let list = [];
   for (let id = 0; id < len; id++) {
     list.push(id);
   }
@@ -55,9 +61,21 @@ function moveDown(rectangle) {
   return rectangle;
 }
 
+function moveUp(rectangle) {
+  rectangle.lowerLeft.moveUp();
+  rectangle.upperRight.moveUp();
+  return rectangle;
+}
+
 function moveLeft(rectangle) {
   rectangle.lowerLeft.moveLeft();
   rectangle.upperRight.moveLeft();
+  return rectangle;
+}
+
+function moveRight(rectangle) {
+  rectangle.lowerLeft.moveRight();
+  rectangle.upperRight.moveRight();
   return rectangle;
 }
 
@@ -73,6 +91,7 @@ function isOccupied(space, occupiedSpaces, table) {
   if (space.lowerLeft.y > table.height || space.lowerLeft.x < 1) {
     return true;
   }
+  // eslint-disable-next-line
   occupiedSpaces.map(rectangle => {
     if (haveCross(space, rectangle)) {
       return true;
@@ -91,17 +110,17 @@ function moveSpace(space, occupiedSpaces, table) {
   do {
     isMove = false;
     while (!isOccupied(moveDown(space), occupiedSpaces, table)) {
-      space = moveDown(space);
       isMove = true;
     }
+    moveUp(space);
     while (!isOccupied(moveLeft(space), occupiedSpaces, table)) {
-      space = moveLeft(space);
       isMove = true;
       while (!isOccupied(moveDown(space), occupiedSpaces, table)) {
-        space = moveDown(space);
         isMove = true;
       }
+      moveUp(space);
     }
+    moveRight(space);
     if (!insideTable(space, table)) {
       isMove = false;
     }
@@ -110,13 +129,14 @@ function moveSpace(space, occupiedSpaces, table) {
     }
   } while (isMove);
   if (isMoveAny) {
-    occupiedSpaces.push_back(space);
+    occupiedSpaces.push(space);
   }
   return isMoveAny;
 }
 
 function getSumSpaces(occupiedSpaces) {
   let sumSpaces = 0;
+  // eslint-disable-next-line
   occupiedSpaces.map(rectangle => {
     sumSpaces += rectangle.getSpace();
   });
@@ -131,12 +151,12 @@ function impossibleAns(space, table) {
 
 function getCost(ans) {
   let cost = 0;
-  let occupiedSpaces = new Array();
+  let occupiedSpaces = [];
   let materialsCount = ans.materials.length;
   for (let i = 0; i < materialsCount; i++) {
-    let lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
-    let upperRight = Point(ans.table.width, -ans.materials[i].height + 1);
-    let space = Rectangle(lowerLeft, upperRight);
+    let lowerLeft = new Point(ans.table.width - ans.materials[i].width + 1, 0);
+    let upperRight = new Point(ans.table.width, -ans.materials[i].height + 1);
+    let space = new Rectangle(lowerLeft, upperRight);
     if (impossibleAns(space, ans.table)) {
       return INF;
     }
@@ -153,21 +173,21 @@ function getCost(ans) {
 }
 
 function getTables(ans) {
-  let tables = new Array();
-  let occupiedSpaces = new Array();
+  let tables = [];
+  let occupiedSpaces = [];
   let materialsCount = ans.materials.length;
   for (let i = 0; i < materialsCount; i++) {
-    let lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
-    let upperRight = Point(ans.table.width, -ans.materials[i].height + 1);
-    let space = Rectangle(lowerLeft, upperRight);
+    let lowerLeft = new Point(ans.table.width - ans.materials[i].width + 1, 0);
+    let upperRight = new Point(ans.table.width, -ans.materials[i].height + 1);
+    let space = new Rectangle(lowerLeft, upperRight);
     if (!moveSpace(space, occupiedSpaces, ans.table)) {
-      tables.push_back(occupiedSpaces);
+      tables.push(occupiedSpaces);
       occupiedSpaces.clear();
       moveSpace(space, occupiedSpaces, ans.table);
     }
   }
   if (occupiedSpaces.length) {
-    tables.push_back(occupiedSpaces);
+    tables.push(occupiedSpaces);
   }
   return tables;
 }
@@ -187,7 +207,7 @@ function applyRotate(input, mask) {
 }
 
 function applyPermutate(input, id) {
-  let materialsPermutate;
+  let materialsPermutate = [];
   let materialsCount = input.materials.length;
   for (let i = 0; i < materialsCount; i++) {
     materialsPermutate.push(input.materials[id[i]]);
@@ -203,7 +223,7 @@ function permute(list) {
   for (i = 0; i < list.length; i++) {
     ch = list.splice(i, 1)[0];
     usedChars.push(ch);
-    if (list.length == 0) {
+    if (list.length === 0) {
       permArr.push(usedChars.slice());
     }
     permute(list);
@@ -216,7 +236,6 @@ function permute(list) {
 function permutate(input) {
   let list = getList(input.materials.length);
   let ans = input;
-
   let allPermutations = permute(list);
   for (let i = 0; i < allPermutations.length; i++) {
     let inputPermutate = applyPermutate(input, allPermutations[i]);
@@ -245,14 +264,14 @@ export const solve = input => {
 };
 
 export const readInput = () => {
-  let mat = new Material();
+  //let mat = new Material();
   let input = new Input();
   let height, width;
   // cin >> height >> width;
-  height = 14;
-  width = 10;
+  height = 720;
+  width = 670;
   input.table = new Material("", height, width);
-  let materialsCount, count, identify;
+  //let materialsCount, count, identify;
   // cin >> materialsCount;
   //   while (materialsCount--) {
   //     //     cin >> identify >> height >> width >> count;
@@ -260,43 +279,47 @@ export const readInput = () => {
   //       input.materials.push(Material(identify, height, width));
   //     }
   //   }
-  input.materials.push(new Material("A", 5, 4));
-  input.materials.push(new Material("A", 5, 4));
-  input.materials.push(new Material("A", 5, 4));
-  input.materials.push(new Material("B", 4, 1));
-  input.materials.push(new Material("C", 7, 3));
-  input.materials.push(new Material("C", 7, 3));
-  input.materials.push(new Material("C", 7, 3));
-  input.materials.push(new Material("C", 7, 3));
+  input.materials.push(new Material("A", 120, 120));
+  // input.materials.push(new Material("A", 120, 120));
+  // input.materials.push(new Material("A", 285, 130));
+  // input.materials.push(new Material("A", 200, 300));
+  // input.materials.push(new Material("B", 165, 230));
+  // input.materials.push(new Material("C", 235, 470));
+  // input.materials.push(new Material("C", 200, 170));
+  // input.materials.push(new Material("C", 285, 220));
+  // input.materials.push(new Material("C", 555, 200));
   return input;
 };
 
 export const ejectScript = input => {
-  //   let input = readInput();
+  // input = readInput();
+  // console.log(input);
   let output = solve(input);
+
   console.log(getCost(output));
 
   let tables = getTables(output);
-  for (let i = 0; i < tables.length; i++) {
-    let table = tables[i];
-    console.log("Table " + (i + 1));
-    table.map(material => {
-      console.log(
-        material.lowerLeft.x +
-          " - " +
-          material.upperRight.x +
-          "<>" +
-          material.upperRight.y +
-          "-" +
-          material.lowerLeft.y
-      );
-    });
-  }
-  return 0;
+  // for (let i = 0; i < tables.length; i++) {
+  //   let table = tables[i];
+  //   console.log("Table " + (i + 1));
+  //   // eslint-disable-next-line
+  //   table.map(material => {
+  //     console.log(
+  //       material.lowerLeft.x +
+  //         " - " +
+  //         material.upperRight.x +
+  //         "<>" +
+  //         material.upperRight.y +
+  //         "-" +
+  //         material.lowerLeft.y
+  //     );
+  //   });
+  // }
+  return tables;
 };
 
 export const prueba = () => {
-  let resultado = new Array();
+  let resultado = [];
   resultado.push(new Rectangle(new Point(0, 0), new Point(5, 4)));
   resultado.push(new Rectangle(new Point(5, 4), new Point(10, 4)));
   resultado.push(new Rectangle(new Point(10, 5), new Point(14, 5)));
@@ -304,5 +327,31 @@ export const prueba = () => {
   resultado.push(new Rectangle(new Point(10, 5), new Point(14, 6)));
   resultado.push(new Rectangle(new Point(0, 7), new Point(7, 10)));
   resultado.push(new Rectangle(new Point(7, 7), new Point(14, 10)));
+  return resultado;
+};
+
+export const prueba2 = () => {
+  let resultado = [];
+  resultado.push(new Rectangle(new Point(0, 0), new Point(5, 4)));
+  resultado.push(new Rectangle(new Point(4, 2), new Point(10, 4)));
+  resultado.push(new Rectangle(new Point(8, 9), new Point(10, 10)));
+  return resultado;
+};
+
+export const prueba3 = () => {
+  let resultado = [];
+  resultado.push(new Rectangle(new Point(3, 4), new Point(10, 7)));
+  resultado.push(new Rectangle(new Point(10, 5), new Point(14, 6)));
+  resultado.push(new Rectangle(new Point(0, 7), new Point(7, 10)));
+  resultado.push(new Rectangle(new Point(7, 7), new Point(14, 10)));
+  return resultado;
+};
+
+export const prueba4 = () => {
+  let resultado = [];
+  resultado.push(new Rectangle(new Point(0, 4), new Point(3, 7)));
+  resultado.push(new Rectangle(new Point(2, 5), new Point(14, 6)));
+  resultado.push(new Rectangle(new Point(0, 7), new Point(7, 10)));
+  resultado.push(new Rectangle(new Point(2, 7), new Point(14, 10)));
   return resultado;
 };

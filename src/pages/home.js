@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Layout from "../components/layout";
 import Canvas from "../components/canvas";
 import Spinner from "../components/spinner";
+// eslint-disable-next-line
 import { prueba, ejectScript, Material } from "../scripts/empaquetamiento";
 
 class Home extends Component {
@@ -16,7 +17,6 @@ class Home extends Component {
     });
   };
   handleClick = e => {
-    console.log(this.state);
     this.setState({
       loading: true
     });
@@ -25,17 +25,17 @@ class Home extends Component {
   handleSubmit = e => {
     e.preventDefault();
     // let resultado = prueba();
-    let materials = new Array();
+    let materials = [];
     for (let i = 1; i < this.state.piezas; i++) {
       materials.push(
         new Material(this.state[i], this.state[i + this.state.piezas + 1])
       );
     }
+    // console.log("materials: " + materials);
     this.setState({
       loading: false,
       materials: materials
     });
-    console.log(this.state);
   };
 
   render() {
@@ -85,19 +85,12 @@ class Home extends Component {
           <div className="col-6">
             <form onSubmit={this.handleSubmit}>
               <h3>
-                <small>Subir en archivo</small>
-              </h3>
-              <div className="form-group">
-                <input type="file" className="form-control-file" id="archivo" />
-              </div>
-
-              <h3>
                 <small>Plancha</small>
               </h3>
 
               <div className="form-row align-items-center">
                 <div className="col-auto">
-                  <label className="sr-only" for="planchaAlto">
+                  <label className="sr-only" htmlFor="planchaAlto">
                     Alto
                   </label>
                   <input
@@ -111,7 +104,7 @@ class Home extends Component {
                 </div>
                 <div className="col-auto">x</div>
                 <div className="col-auto">
-                  <label className="sr-only" for="planchaAncho">
+                  <label className="sr-only" htmlFor="planchaAncho">
                     Ancho
                   </label>
                   <div className="input-group mb-2">
@@ -128,7 +121,7 @@ class Home extends Component {
               </div>
 
               <div className="form-inline">
-                <label className="my-1 mr-2" for="piezas">
+                <label className="my-1 mr-2" htmlFor="piezas">
                   N° de piezas
                 </label>
                 <select
@@ -177,13 +170,10 @@ class Home extends Component {
             </h3>
             <Spinner active={this.state.loading} />
             <p>
-              Se necesitaran <b>4</b> planchas para cubrir el pedido
+              Se necesitaran <b></b> planchas para cubrir el pedido
             </p>
             <p>
-              El desperdicio es de <b>30m2</b> o <b>10%</b> del total usado
-            </p>
-            <p>
-              La cantidad de cortes requeridos son <b>4</b> planchas
+              El desperdicio es de <b></b>m2 o <b></b>% del total usado
             </p>
 
             <div>

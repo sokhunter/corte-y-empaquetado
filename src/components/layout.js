@@ -2,9 +2,11 @@ import React from "react";
 
 function Layout(props) {
   return (
+    // eslint-disable-next-line
     <React.Fragment>
       <nav className="navbar navbar-light bg-light">
-        <a className="navbar-brand" href="#">
+        {/* <a className="navbar-brand" href="#"> */}
+        <button className="navbar-brand">
           <img
             src=""
             width="30"
@@ -13,7 +15,7 @@ function Layout(props) {
             alt=""
           />
           Proyecto
-        </a>
+        </button>
       </nav>
       <div className="container">{props.children}</div>
       <div>Todos los derechos reservados Copyright 2019</div>

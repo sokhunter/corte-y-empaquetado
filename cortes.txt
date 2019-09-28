@@ -1,0 +1,280 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long Long;
+const int INF = 1e9 + 7;
+
+/**********************************/
+struct Material {
+    string id;
+    int height;
+    int width;
+    Material() {}
+    Material (string id, int height, int width) {
+        this->id = id;
+        this->height = height;
+        this->width = width;
+    }
+    void rotate() {
+        swap(this->height, this->width);
+    }
+};
+
+struct Point {
+	int x, y;
+	Point() {}
+	Point(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+	void moveDown() {
+		this->y ++;
+	}
+	void moveLeft() {
+		this->x --;
+	}
+};
+
+struct Rectangle {
+	Point lowerLeft;
+	Point upperRight;
+	Rectangle() {}
+	Rectangle(Point lowerLeft, Point upperRight) {
+		this->lowerLeft = lowerLeft;
+		this->upperRight = upperRight;
+	}
+};
+
+/**********************************/
+struct Input {
+    Material table;
+    vector<Material> materials;
+    Input() {}
+};
+
+Input readInput() {
+    Input input = Input();
+    int height, width;
+    cin >> height >> width;
+    input.table = Material("", height, width);
+    int materialsCount, count;
+    string identify;
+    cin >> materialsCount;
+    while (materialsCount --) {
+        cin >> identify >> height >> width >> count;
+        while (count --) {
+            input.materials.push_back(Material(identify, height, width));
+        }
+    }
+    return input;
+}
+
+/**********************************/
+vector<int> getList(int len) {
+    vector<int> list;
+    for (int id = 0; id < len; id ++) {
+        list.push_back(id);
+    }
+    return list;
+}
+
+/**********************************/
+typedef Input Output;
+
+Rectangle moveDown(Rectangle rectangle) {
+	rectangle.lowerLeft.moveDown();
+	rectangle.upperRight.moveDown();
+	return rectangle;
+}
+
+Rectangle moveLeft(Rectangle rectangle) {
+	rectangle.lowerLeft.moveLeft();
+	rectangle.upperRight.moveLeft();
+	return rectangle;
+}
+
+/**********************************/
+bool haveCross(Rectangle r1, Rectangle r2) {
+	bool haveCrossX = (r1.lowerLeft.x <= r2.upperRight.x && r2.lowerLeft.x <= r1.upperRight.x);
+	bool haveCrossY = (r2.upperRight.y <= r1.lowerLeft.y && r1.upperRight.y <= r2.lowerLeft.y);
+	return haveCrossX && haveCrossY;
+}
+
+bool isOccupied(Rectangle space, vector<Rectangle> occupiedSpaces, Material table) {
+	if (space.lowerLeft.y > table.height || space.lowerLeft.x < 1) {
+		return true;
+	}
+	for (Rectangle rectangle: occupiedSpaces) {
+		if (haveCross(space, rectangle)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool insideTable(Rectangle space, Material table) {
+	return space.upperRight.y >= 1;
+}
+
+bool moveSpace(Rectangle space, vector<Rectangle> &occupiedSpaces, Material table) {
+	bool isMoveAny = false;
+	bool isMove;
+	do {
+		isMove = false;
+    	while (!isOccupied(moveDown(space), occupiedSpaces, table)) {
+    		space = moveDown(space);
+    		isMove = true;
+		}
+		while (!isOccupied(moveLeft(space), occupiedSpaces, table)) {
+    		space = moveLeft(space);
+    		isMove = true;
+    		while (!isOccupied(moveDown(space), occupiedSpaces, table)) {
+	    		space = moveDown(space);
+	    		isMove = true;
+			}
+		}
+		if (!insideTable(space, table)) {
+			isMove = false;
+		}
+		if (isMove) {
+			isMoveAny = true;
+		}
+	} while (isMove);
+	if (isMoveAny) {
+		occupiedSpaces.push_back(space);
+	}
+	return isMoveAny;
+}
+
+Long getSpace(Rectangle rectangle) {
+	Long w = rectangle.upperRight.x - rectangle.lowerLeft.x + 1;
+	Long h = rectangle.lowerLeft.y - rectangle.upperRight.y + 1;
+	return w*h;
+}
+
+Long getSumSpaces(vector<Rectangle> occupiedSpaces) {
+	Long sumSpaces = 0;
+	for (Rectangle rectangle: occupiedSpaces) {
+		sumSpaces += getSpace(rectangle);
+	}
+	return sumSpaces;
+}
+
+bool impossibleAns(Rectangle space, Material table) {
+	bool exceededX = (space.upperRight.x - space.lowerLeft.x + 1 > table.width);
+	bool exceededY = (space.lowerLeft.y - space.upperRight.y + 1 > table.height);
+	return exceededX || exceededY;
+}
+
+Long getCost(Output ans) {
+	Long cost = 0;
+	vector<Rectangle> occupiedSpaces;
+	int materialsCount = ans.materials.size();
+    for (int i = 0; i < materialsCount; i ++) {
+    	Point lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
+    	Point upperRight = Point(ans.table.width, - ans.materials[i].height + 1);
+    	Rectangle space = Rectangle(lowerLeft, upperRight);
+    	if (impossibleAns(space, ans.table)) {
+    		return INF;
+		}
+    	if (!moveSpace(space, occupiedSpaces, ans.table)) {
+    		cost += ans.table.height*ans.table.width - getSumSpaces(occupiedSpaces);
+    		occupiedSpaces.clear();
+    		moveSpace(space, occupiedSpaces, ans.table);
+		}
+	}
+	if (occupiedSpaces.size()) {
+		cost += ans.table.height*ans.table.width - getSumSpaces(occupiedSpaces);
+	}
+	return cost;
+}
+
+vector<vector<Rectangle>> getTables(Output ans) {
+	vector<vector<Rectangle>> tables;
+	vector<Rectangle> occupiedSpaces;
+	int materialsCount = ans.materials.size();
+    for (int i = 0; i < materialsCount; i ++) {
+    	Point lowerLeft = Point(ans.table.width - ans.materials[i].width + 1, 0);
+    	Point upperRight = Point(ans.table.width, - ans.materials[i].height + 1);
+    	Rectangle space = Rectangle(lowerLeft, upperRight);
+    	if (!moveSpace(space, occupiedSpaces, ans.table)) {
+    		tables.push_back(occupiedSpaces);
+    		occupiedSpaces.clear();
+    		moveSpace(space, occupiedSpaces, ans.table);
+		}
+	}
+	if (occupiedSpaces.size()) {
+		tables.push_back(occupiedSpaces);
+	}
+	return tables;
+}
+
+/**********************************/
+Output getBestAns(Output ans1, Output ans2) {
+    return getCost(ans1) < getCost(ans2)? ans1: ans2;
+}
+
+/**********************************/
+Input applyRotate(Input input, Long mask) {
+    int materialsCount = input.materials.size();
+    for (int i = 0; i < materialsCount; i ++) {
+        if ((mask >> i)&1) {
+            input.materials[i].rotate();
+        }
+    }
+    return input;
+}
+
+Input applyPermutate(Input input, vector<int> id) {
+    vector<Material> materialsPermutate;
+    int materialsCount = input.materials.size();
+    for (int i = 0; i < materialsCount; i ++) {
+        materialsPermutate.push_back(input.materials[id[i]]);
+    }
+    input.materials = materialsPermutate;
+    return input;
+}
+
+/**********************************/
+Output permutate(Input input) {
+    vector<int> list = getList(input.materials.size());
+    Output ans = input;
+    do {
+        Input inputPermutate = applyPermutate(input, list);
+        ans = getBestAns(ans, inputPermutate);
+    } while(next_permutation(list.begin(), list.end()));
+    return ans;
+}
+
+Output rotateAndPermutate(Input input) {
+    int materialsCount = input.materials.size();
+    Output ans = input;
+    for (Long mask = 0; mask < (1 << materialsCount); mask ++) {
+        Input inputRotate = applyRotate(input, mask);
+        Output ansPossible = permutate(inputRotate);
+        ans = getBestAns(ans, ansPossible);
+    }
+    return ans;
+}
+
+Output solve(Input input) {
+    return rotateAndPermutate(input);
+}
+
+/**********************************/
+
+int main() {
+    Input input = readInput();
+    Output output = solve(input);
+    cout << getCost(output) << endl;
+    vector<vector<Rectangle>> tables = getTables(output);
+    for (int i = 0; i < tables.size(); i ++) {
+    	vector<Rectangle> table = tables[i];
+    	printf("TABLE %d:\n", i + 1);
+    	for (Rectangle material: table) {
+    		printf("%d - %d <> %d %d\n", material.lowerLeft.x, material.upperRight.x, material.upperRight.y, material.lowerLeft.y);
+		}
+	}
+    
+    return 0;
+}
